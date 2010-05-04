@@ -23,7 +23,6 @@ class Scrobble(object):
 
 class NowPlaying(object):
     def __init__(self, **kwargs):
-        self.timestamp=kwargs.get('timestamp')
         self.artist=kwargs.get('artist')
         self.album=kwargs.get('album')
         self.track=kwargs.get('track')
@@ -151,6 +150,7 @@ class ScrobblingAPI(object):
             print "Artist correction returned: " + nowPlaying.artist + " -> " + artist
         if track != nowPlaying.track:
             print "Track correction returned: " + nowPlaying.track + " -> " + track
+        return response
 
 
     def scrobble(self, scrobble):
@@ -179,15 +179,15 @@ if __name__ == '__main__':
     api = ScrobblingAPI()
     time.sleep(1)
     #send a now playing update
-    np = NowPlaying(artist="Test Artist", track="Test Track", timestamp=str(int(time.time())))
-    api.updateNowPlaying(np)
+    np = NowPlaying(artist="Test Artist", track="Test Track")
+    print api.updateNowPlaying(np)
     time.sleep(1)
     #send a single scrobble
     s = Scrobble(artist="Test Artist", track="Test Track", timestamp=str(int(time.time())))
-    api.scrobble(s)
+    print api.scrobble(s)
     time.sleep(1)
     #send a batch of scrobbles
     s0 = Scrobble(artist="Test Artist 0", track="Test Track 0", timestamp=str(int(time.time())))
     s1 = Scrobble(artist="Test Artist 1", track="Test Track 1", timestamp=str(int(time.time())))
-    api.scrobbleBatch([s0,s1])
+    print api.scrobbleBatch([s0,s1])
 
