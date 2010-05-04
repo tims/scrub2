@@ -164,7 +164,7 @@ class ScrobblingAPI(object):
 
     def scrobbleBatch(self, scrobbles):
         params = {}
-        i = 1
+        i = 0
         for scrobble in scrobbles:
             params.update(dict(("%s[%s]" % (k,i), v) for (k, v) in scrobble.__dict__.iteritems() if not v is None))
             i += 1
