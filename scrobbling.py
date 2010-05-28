@@ -32,7 +32,7 @@ class NowPlaying(object):
         self.context=kwargs.get('context')
         self.contextUrl=kwargs.get('contextUrl')
 
-class ScrobblingAPI(object):
+class ScrobblingClient(object):
     def __init__(self):
         self.configFile = 'config.yaml'
         self.authUrl = 'http://www.last.fm/api/auth/'
@@ -176,7 +176,7 @@ class ScrobblingAPI(object):
         return self.postRequest(self.scrobblingUrl, params)
 
 if __name__ == '__main__':
-    api = ScrobblingAPI()
+    api = ScrobblingClient()
     time.sleep(1)
     #send a now playing update
     np = NowPlaying(artist="Test Artist", track="Test Track")
