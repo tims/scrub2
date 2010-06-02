@@ -18,8 +18,6 @@ class Scrobble(object):
         self.mbid=kwargs.get('mbid')
         self.streamId=kwargs.get('streamId')
         self.streamAuth=kwargs.get('streamAuth')
-        self.context=kwargs.get('context')
-        self.contextUrl=kwargs.get('contextUrl')
 
 class NowPlaying(object):
     def __init__(self, **kwargs):
