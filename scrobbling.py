@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 import urllib, urllib2
 from urllib2 import HTTPError
 import hashlib
@@ -189,3 +191,4 @@ if __name__ == '__main__':
     s1 = Scrobble(artist="Test Artist 1", track="Test Track 1", timestamp=str(int(time.time())))
     print api.scrobbleBatch([s0,s1])
 
+ 
