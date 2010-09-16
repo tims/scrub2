@@ -101,7 +101,7 @@ class ScrobbleTestCase(unittest.TestCase):
         assert resp.scrobbles.scrobble.artist.contents[0] == u"Björk"
         assert resp.scrobbles.scrobble['corrected'] == "1"
 
-    def testNowPlayingAcceptedCorrectedArtist(self):
+    def testNowPlayingAcceptedCorrectedTrack(self):
         resp = self.client.updateNowPlaying(NowPlaying(artist="Björk", track="Joga", albumArtist="Test Album Artist"))
         print resp.prettify()
         assert int(resp.scrobbles['accepted']) == 1

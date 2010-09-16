@@ -9,67 +9,67 @@ class ScrobbleTestCase(unittest.TestCase):
     def setUp(self):
         self.client = ScrobblingClient()
 
-    def testSingleScrobbleAccepted(self):
+    def testScrobbleAccepted(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Test Track", timestamp=str(int(time.time()))))
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
 
-    def testSingleScrobbleFilteredArtist(self):
+    def testScrobbleFilteredArtist(self):
         resp = self.client.scrobble(Scrobble(artist="Unknown Artist",track="Test Track", timestamp=str(int(time.time()))))
         assert int(resp.scrobbles['accepted']) == 0
         assert int(resp.scrobbles['ignored']) == 1
         assert int(resp.scrobbles.scrobble.ignoredmessage['code']) == 1
 
-    def testSingleScrobbleFilteredTrack(self):
+    def testScrobbleFilteredTrack(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Track 1", timestamp=str(int(time.time()))))
         assert int(resp.scrobbles['accepted']) == 0
         assert int(resp.scrobbles['ignored']) == 1
         assert int(resp.scrobbles.scrobble.ignoredmessage['code']) == 2
 
-    def testSingleScrobbleFilteredTimestampPast(self):
+    def testScrobbleFilteredTimestampPast(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Test Track", timestamp="0"))
         assert int(resp.scrobbles['accepted']) == 0
         assert int(resp.scrobbles['ignored']) == 1
         assert int(resp.scrobbles.scrobble.ignoredmessage['code']) == 3
 
-    def testSingleScrobbleFilteredTimestampFuture(self):
+    def testScrobbleFilteredTimestampFuture(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Test Track", timestamp=str(pow(2, 32)-1)))
         assert int(resp.scrobbles['accepted']) == 0
         assert int(resp.scrobbles['ignored']) == 1
         assert int(resp.scrobbles.scrobble.ignoredmessage['code']) == 4
 
-    def testSingleScrobbleAcceptedArtistSet(self):
+    def testScrobbleAcceptedArtistSet(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Test Track", timestamp=str(int(time.time()))))
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
         assert resp.scrobbles.scrobble.artist.contents[0] == u"Test Artist"
 
-    def testSingleScrobbleAcceptedTrackSet(self):
+    def testScrobbleAcceptedTrackSet(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Test Track", timestamp=str(int(time.time()))))
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
         assert resp.scrobbles.scrobble.track.contents[0] == u"Test Track"
 
-    def testSingleScrobbleAcceptedAlbumSet(self):
+    def testScrobbleAcceptedAlbumSet(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist", track="Test Track", album="Test Album", timestamp=str(int(time.time()))))
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
         assert resp.scrobbles.scrobble.album.contents[0] == u"Test Album"
 
-    def testSingleScrobbleAcceptedAlbumArtistSet(self):
+    def testScrobbleAcceptedAlbumArtistSet(self):
         resp = self.client.scrobble(Scrobble(artist="Test Artist", track="Test Track", albumArtist="Test Album Artist", timestamp=str(int(time.time()))))
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
         assert resp.scrobbles.scrobble.albumartist.contents[0] == u"Test Album Artist"
 
-    def testSingleScrobbleAcceptedTimestampSet(self):
+    def testScrobbleAcceptedTimestampSet(self):
         timestamp=str(int(time.time()))
         resp = self.client.scrobble(Scrobble(artist="Test Artist", track="Test Track", albumArtist="Test Album Artist", timestamp=timestamp))
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
         assert str(resp.scrobbles.scrobble.timestamp.contents[0]) == timestamp
 
-    def testSingleScrobbleInvalidParameterArtistMissing(self):
+    def testScrobbleInvalidParameterArtistMissing(self):
         timestamp=str(int(time.time()))
         try:
             resp = self.client.scrobble(Scrobble(track="Test Track", timestamp=str(int(time.time()))))
@@ -80,7 +80,7 @@ class ScrobbleTestCase(unittest.TestCase):
             assert int(soup.error['code']) == 6
             print soup.prettify()
 
-    def testSingleScrobbleInvalidParameterArtistEmpty(self):
+    def testScrobbleInvalidParameterArtistEmpty(self):
         timestamp=str(int(time.time()))
         try:
             resp = self.client.scrobble(Scrobble(artist="", track="Test Track", timestamp=str(int(time.time()))))
@@ -91,7 +91,7 @@ class ScrobbleTestCase(unittest.TestCase):
             assert int(soup.error['code']) == 6
             print soup.prettify()
 
-    def testSingleScrobbleInvalidParameterTrackMissing(self):
+    def testScrobbleInvalidParameterTrackMissing(self):
         timestamp=str(int(time.time()))
         try:
             resp = self.client.scrobble(Scrobble(artist="Test Artist", timestamp=str(int(time.time()))))
@@ -102,7 +102,7 @@ class ScrobbleTestCase(unittest.TestCase):
             assert int(soup.error['code']) == 6
             print soup.prettify()
 
-    def testSingleScrobbleInvalidParameterTrackEmpty(self):
+    def testScrobbleInvalidParameterTrackEmpty(self):
         timestamp=str(int(time.time()))
         try:
             resp = self.client.scrobble(Scrobble(artist="Test Artist", track="", timestamp=str(int(time.time()))))
@@ -113,7 +113,7 @@ class ScrobbleTestCase(unittest.TestCase):
             assert int(soup.error['code']) == 6
             print soup.prettify()
 
-    def testSingleScrobbleInvalidParameterTimestampMissing(self):
+    def testScrobbleInvalidParameterTimestampMissing(self):
         timestamp=str(int(time.time()))
         try:
             resp = self.client.scrobble(Scrobble(artist="Test Artist", track="Test Track"))
@@ -124,7 +124,7 @@ class ScrobbleTestCase(unittest.TestCase):
             assert int(soup.error['code']) == 6
             print soup.prettify()
 
-    def testSingleScrobbleInvalidParameterTimestampEmpty(self):
+    def testScrobbleInvalidParameterTimestampEmpty(self):
         timestamp=str(int(time.time()))
         try:
             resp = self.client.scrobble(Scrobble(artist="Test Artist", track="Test Track", timestamp=""))
@@ -135,7 +135,7 @@ class ScrobbleTestCase(unittest.TestCase):
             assert int(soup.error['code']) == 6
             print soup.prettify()
 
-    def testSingleScrobbleAcceptedCorrectedArtist(self):
+    def testScrobbleAcceptedCorrectedArtist(self):
         resp = self.client.scrobble(Scrobble(artist="Bjork", track="Jóga", albumArtist="Test Album Artist", timestamp=str(int(time.time()))))
         print resp.prettify()
         assert int(resp.scrobbles['accepted']) == 1
@@ -143,7 +143,7 @@ class ScrobbleTestCase(unittest.TestCase):
         assert resp.scrobbles.scrobble.artist.contents[0] == u"Björk"
         assert resp.scrobbles.scrobble['corrected'] == "1"
 
-    def testSingleScrobbleAcceptedCorrectedArtist(self):
+    def testScrobbleAcceptedCorrectedTrack(self):
         resp = self.client.scrobble(Scrobble(artist="Björk", track="Joga", albumArtist="Test Album Artist", timestamp=str(int(time.time()))))
         print resp.prettify()
         assert int(resp.scrobbles['accepted']) == 1
