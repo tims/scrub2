@@ -5,50 +5,27 @@ import xmlrunner
 import time
 from BeautifulSoup import BeautifulStoneSoup
 
-class ScrobbleTestCase(unittest.TestCase):
+class NowPlayingTestCase(unittest.TestCase):
     def setUp(self):
         self.client = ScrobblingClient()
 
-    def testNowPlaying(self):
-        resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist",track="Test Track"))
-        assert int(resp.scrobbles['accepted']) == 1
-        assert int(resp.scrobbles['ignored']) == 0
 
     def testNowPlayingFilteredArtist(self):
         resp = self.client.updateNowPlaying(NowPlaying(artist="Unknown Artist",track="Test Track"))
-        assert int(resp.scrobbles['accepted']) == 0
-        assert int(resp.scrobbles['ignored']) == 1
-        assert int(resp.scrobbles.scrobble.ignoredmessage['code']) == 1
+        assert int(resp.nowplaying.ignoredmessage['code']) == 1
 
     def testNowPlayingFilteredTrack(self):
         resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist",track="Track 1"))
-        assert int(resp.scrobbles['accepted']) == 0
-        assert int(resp.scrobbles['ignored']) == 1
-        assert int(resp.scrobbles.scrobble.ignoredmessage['code']) == 2
+        print resp.prettify()
+        assert int(resp.nowplaying.ignoredmessage['code']) == 2
 
-    def testNowPlayingAcceptedArtistSet(self):
-        resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist",track="Test Track"))
-        assert int(resp.scrobbles['accepted']) == 1
-        assert int(resp.scrobbles['ignored']) == 0
-        assert resp.scrobbles.scrobble.artist.contents[0] == u"Test Artist"
-
-    def testNowPlayingAcceptedTrackSet(self):
-        resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist",track="Test Track"))
-        assert int(resp.scrobbles['accepted']) == 1
-        assert int(resp.scrobbles['ignored']) == 0
-        assert resp.scrobbles.scrobble.track.contents[0] == u"Test Track"
-
-    def testNowPlayingAcceptedAlbumSet(self):
-        resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist", track="Test Track", album="Test Album"))
-        assert int(resp.scrobbles['accepted']) == 1
-        assert int(resp.scrobbles['ignored']) == 0
-        assert resp.scrobbles.scrobble.album.contents[0] == u"Test Album"
-
-    def testNowPlayingAcceptedAlbumArtistSet(self):
-        resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist", track="Test Track", albumArtist="Test Album Artist"))
-        assert int(resp.scrobbles['accepted']) == 1
-        assert int(resp.scrobbles['ignored']) == 0
-        assert resp.scrobbles.scrobble.albumartist.contents[0] == u"Test Album Artist"
+    def testNowPlayingAcceptedParamsSet(self):
+        resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist",track="Test Track", album="Test Album", albumArtist="Test Album Artist"))
+        print resp.prettify()
+        assert resp.nowplaying.artist.contents[0] == u"Test Artist"
+        assert resp.nowplaying.track.contents[0] == u"Test Track"
+        assert resp.nowplaying.album.contents[0] == u"Test Album"
+        assert resp.nowplaying.albumartist.contents[0] == u"Test Album Artist"
 
     def testNowPlayingInvalidParameterArtistMissing(self):
         try:
@@ -86,6 +63,7 @@ class ScrobbleTestCase(unittest.TestCase):
         timestamp=str(int(time.time()))
         try:
             resp = self.client.updateNowPlaying(NowPlaying(artist="Test Artist", track=""))
+            print resp.prettify()
             assert 1 == 2, "exception should be thrown"
         except HTTPError, e:
             assert e.code == 400
@@ -94,26 +72,28 @@ class ScrobbleTestCase(unittest.TestCase):
             print soup.prettify()
 
     def testNowPlayingAcceptedCorrectedArtist(self):
-        resp = self.client.updateNowPlaying(NowPlaying(artist="Bjork", track="Jóga", albumArtist="Test Album Artist"))
+        resp = self.client.updateNowPlaying(NowPlaying(artist="Bjork", track="Jóga"))
         print resp.prettify()
-        assert int(resp.scrobbles['accepted']) == 1
-        assert int(resp.scrobbles['ignored']) == 0
-        assert resp.scrobbles.scrobble.artist.contents[0] == u"Björk"
-        assert resp.scrobbles.scrobble['corrected'] == "1"
+        assert resp.nowplaying.artist.contents[0] == u"Björk"
+        assert resp.nowplaying['corrected'] == "1"
 
     def testNowPlayingAcceptedCorrectedTrack(self):
-        resp = self.client.updateNowPlaying(NowPlaying(artist="Björk", track="Joga", albumArtist="Test Album Artist"))
+        resp = self.client.updateNowPlaying(NowPlaying(artist="Björk", track="Joga"))
         print resp.prettify()
-        assert int(resp.scrobbles['accepted']) == 1
-        assert int(resp.scrobbles['ignored']) == 0
-        assert resp.scrobbles.scrobble.track.contents[0] == u"Jóga"
-        assert resp.scrobbles.scrobble['corrected'] == "1"
+        assert resp.nowplaying.track.contents[0] == u"Jóga"
+        assert resp.nowplaying['corrected'] == "1"
 
 
-suite = unittest.TestSuite([ unittest.TestLoader().loadTestsFromTestCase(ScrobbleTestCase)])
+def suite():
+    suite = unittest.TestSuite([ unittest.TestLoader().loadTestsFromTestCase(NowPlayingTestCase)])
+    #suite = unittest.TestSuite()
+    #suite.addTest(NowPlayingTestCase("testNowPlayingAcceptedParamsSet"))
+    #suite.addTest(NowPlayingTestCase("testNowPlayingAcceptedCorrectedTrack"))
+    return suite
+
 if __name__ == "__main__":
+    runner = unittest.TextTestRunner()
     #runner = xmlrunner.XMLTestRunner(sys.stdout)
-    #runner.run(suite)
-    unittest.main()
+    runner.run(suite())
 
 

@@ -73,7 +73,7 @@ class ScrobbleBatchTestCase(unittest.TestCase):
         assert int(s1.ignoredmessage['code']) == 3
 
     def testScrobbleFilteredTimestampFuture(self):
-        self.scrobble1.timestamp = str(pow(2, 32)-1)
+        self.scrobble1.timestamp = str(pow(2, 31)-1)
         resp = self.client.scrobbleBatch([self.scrobble0, self.scrobble1])
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 1
@@ -87,6 +87,7 @@ class ScrobbleBatchTestCase(unittest.TestCase):
         self.scrobble1.albumArtist = "Test Album Artist 1"
         try:
             resp = self.client.scrobbleBatch([self.scrobble0, self.scrobble1])
+            print resp.prettify()
         except HTTPError, e:
             print e,"\n",e.read()
             raise e
@@ -97,13 +98,13 @@ class ScrobbleBatchTestCase(unittest.TestCase):
         assert s0.artist.contents[0] == u"Test Artist 0"
         assert s0.track.contents[0] == u"Test Track 0"
         assert s0.album.contents[0] == u"Test Album 0"
-        assert s0.albumArtist.contents[0] == u"Test Album Artist 0"
+        assert s0.albumartist.contents[0] == u"Test Album Artist 0"
         assert str(s0.timestamp.contents[0]) == self.scrobble0.timestamp
 
         assert s1.artist.contents[0] == u"Test Artist 1"
         assert s1.track.contents[0] == u"Test Track 1"
         assert s1.album.contents[0] == u"Test Album 1"
-        assert s1.albumArtist.contents[0] == u"Test Album Artist 1"
+        assert s1.albumartist.contents[0] == u"Test Album Artist 1"
         assert str(s1.timestamp.contents[0]) == self.scrobble1.timestamp
 
     def testScrobbleInvalidParameterArtistMissing(self):
@@ -198,8 +199,8 @@ class ScrobbleBatchTestCase(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite([ unittest.TestLoader().loadTestsFromTestCase(ScrobbleBatchTestCase)])
-    suite = unittest.TestSuite()
-    suite.addTest(ScrobbleBatchTestCase("testScrobbleRejected51"))
+    #suite = unittest.TestSuite()
+    #suite.addTest(ScrobbleBatchTestCase("testScrobbleParamsSet"))
     #suite.addTest(ScrobbleBatchTestCase("testScrobbleInvalidParameterArtistEmpty"))
 
     return suite
