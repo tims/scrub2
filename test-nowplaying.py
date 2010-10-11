@@ -9,7 +9,6 @@ class NowPlayingTestCase(unittest.TestCase):
     def setUp(self):
         self.client = ScrobblingClient()
 
-
     def testNowPlayingFilteredArtist(self):
         resp = self.client.updateNowPlaying(NowPlaying(artist="Unknown Artist",track="Test Track"))
         assert int(resp.nowplaying.ignoredmessage['code']) == 1
@@ -26,6 +25,10 @@ class NowPlayingTestCase(unittest.TestCase):
         assert resp.nowplaying.track.contents[0] == u"Test Track"
         assert resp.nowplaying.album.contents[0] == u"Test Album"
         assert resp.nowplaying.albumartist.contents[0] == u"Test Album Artist"
+        assert resp.nowplaying.artist['corrected'] == "0"
+        assert resp.nowplaying.track['corrected'] == "0"
+        assert resp.nowplaying.album['corrected'] == "0"
+        assert resp.nowplaying.albumartist['corrected'] == "0"
 
     def testNowPlayingInvalidParameterArtistMissing(self):
         try:
@@ -75,14 +78,21 @@ class NowPlayingTestCase(unittest.TestCase):
         resp = self.client.updateNowPlaying(NowPlaying(artist="Bjork", track="Jóga"))
         print resp.prettify()
         assert resp.nowplaying.artist.contents[0] == u"Björk"
-        assert resp.nowplaying['corrected'] == "1"
+        assert resp.nowplaying.artist['corrected'] == "1"
 
     def testNowPlayingAcceptedCorrectedTrack(self):
         resp = self.client.updateNowPlaying(NowPlaying(artist="Björk", track="Joga"))
         print resp.prettify()
         assert resp.nowplaying.track.contents[0] == u"Jóga"
-        assert resp.nowplaying['corrected'] == "1"
+        assert resp.nowplaying.track['corrected'] == "1"
 
+    def testNowPlayingAcceptedCorrectedArtistAndTrack(self):
+        resp = self.client.updateNowPlaying(NowPlaying(artist="Bjork", track="Joga"))
+        print resp.prettify()
+        assert resp.nowplaying.artist.contents[0] == u"Björk"
+        assert resp.nowplaying.artist['corrected'] == "1"
+        assert resp.nowplaying.track.contents[0] == u"Jóga"
+        assert resp.nowplaying.track['corrected'] == "1"
 
 def suite():
     suite = unittest.TestSuite([ unittest.TestLoader().loadTestsFromTestCase(NowPlayingTestCase)])

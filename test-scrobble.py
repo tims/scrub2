@@ -10,9 +10,16 @@ class ScrobbleTestCase(unittest.TestCase):
         self.client = ScrobblingClient()
 
     def testScrobbleAccepted(self):
-        resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Test Track", timestamp=str(int(time.time()))))
+        timestamp=str(int(time.time()))
+        resp = self.client.scrobble(Scrobble(artist="Test Artist",track="Test Track", timestamp=timestamp))
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
+        assert resp.scrobbles.scrobble.artist['corrected'] == "0"
+        assert resp.scrobbles.scrobble.track['corrected'] == "0"
+        assert resp.scrobbles.scrobble.album['corrected'] == "0"
+        assert resp.scrobbles.scrobble.albumartist['corrected'] == "0"
+        print resp.prettify()
+        assert str(resp.scrobbles.scrobble.timestamp.contents[0]) == timestamp
 
     def testScrobbleFilteredArtist(self):
         resp = self.client.scrobble(Scrobble(artist="Unknown Artist",track="Test Track", timestamp=str(int(time.time()))))
@@ -98,10 +105,10 @@ class ScrobbleTestCase(unittest.TestCase):
             resp = self.client.scrobble(Scrobble(artist="Test Artist", timestamp=str(int(time.time()))))
             assert 1 == 2, "exception should be thrown"
         except HTTPError, e:
-            assert e.code == 400
             soup = BeautifulStoneSoup(e.read())
-            assert int(soup.error['code']) == 6
             print soup.prettify()
+            assert e.code == 400
+            assert int(soup.error['code']) == 6
 
     def testScrobbleInvalidParameterTrackEmpty(self):
         timestamp=str(int(time.time()))
@@ -109,10 +116,10 @@ class ScrobbleTestCase(unittest.TestCase):
             resp = self.client.scrobble(Scrobble(artist="Test Artist", track="", timestamp=str(int(time.time()))))
             assert 1 == 2, "exception should be thrown"
         except HTTPError, e:
-            assert e.code == 400
             soup = BeautifulStoneSoup(e.read())
-            assert int(soup.error['code']) == 6
             print soup.prettify()
+            assert e.code == 400
+            assert int(soup.error['code']) == 6
 
     def testScrobbleInvalidParameterTimestampMissing(self):
         try:
@@ -134,13 +141,23 @@ class ScrobbleTestCase(unittest.TestCase):
             assert int(soup.error['code']) == 6
             print soup.prettify()
 
+    def testScrobbleAcceptedCorrectedArtistAndTrack(self):
+        resp = self.client.scrobble(Scrobble(artist="Bjork", track="Joga", albumArtist="Test Album Artist", timestamp=str(int(time.time()))))
+        print resp.prettify()
+        assert int(resp.scrobbles['accepted']) == 1
+        assert int(resp.scrobbles['ignored']) == 0
+        assert resp.scrobbles.scrobble.artist.contents[0] == u"Björk"
+        assert resp.scrobbles.scrobble.artist['corrected'] == "1"
+        assert resp.scrobbles.scrobble.track.contents[0] == u"Jóga"
+        assert resp.scrobbles.scrobble.track['corrected'] == "1"
+
     def testScrobbleAcceptedCorrectedArtist(self):
         resp = self.client.scrobble(Scrobble(artist="Bjork", track="Jóga", albumArtist="Test Album Artist", timestamp=str(int(time.time()))))
         print resp.prettify()
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
         assert resp.scrobbles.scrobble.artist.contents[0] == u"Björk"
-        assert resp.scrobbles.scrobble['corrected'] == "1"
+        assert resp.scrobbles.scrobble.artist['corrected'] == "1"
 
     def testScrobbleAcceptedCorrectedTrack(self):
         resp = self.client.scrobble(Scrobble(artist="Björk", track="Joga", albumArtist="Test Album Artist", timestamp=str(int(time.time()))))
@@ -148,7 +165,7 @@ class ScrobbleTestCase(unittest.TestCase):
         assert int(resp.scrobbles['accepted']) == 1
         assert int(resp.scrobbles['ignored']) == 0
         assert resp.scrobbles.scrobble.track.contents[0] == u"Jóga"
-        assert resp.scrobbles.scrobble['corrected'] == "1"
+        assert resp.scrobbles.scrobble.track['corrected'] == "1"
 
 """
     def testScrobbleUnavailable(self):
@@ -185,7 +202,7 @@ class ScrobbleTestCase(unittest.TestCase):
 def suite():
     suite = unittest.TestSuite([ unittest.TestLoader().loadTestsFromTestCase(ScrobbleTestCase)])
     #suite = unittest.TestSuite()
-    #suite.addTest(ScrobbleTestCase("testScrobbleBadRequest"))
+    #suite.addTest(ScrobbleTestCase("testScrobbleAccepted"))
     return suite
 
 if __name__ == "__main__":

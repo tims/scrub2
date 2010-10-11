@@ -184,7 +184,7 @@ class ScrobbleBatchTestCase(unittest.TestCase):
         assert int(resp.scrobbles['ignored']) == 0
         s0,s1 = resp.findAll("scrobble")
         assert s1.artist.contents[0] == u"Björk"
-        assert s1['corrected'] == "1"
+        assert s1.artist['corrected'] == "1"
 
     def testScrobbleAcceptedCorrectedTrack(self):
         self.scrobble1.artist="Björk"
@@ -195,7 +195,26 @@ class ScrobbleBatchTestCase(unittest.TestCase):
         assert int(resp.scrobbles['ignored']) == 0
         s0,s1 = resp.findAll("scrobble")
         assert s1.track.contents[0] == u"Jóga"
-        assert s1['corrected'] == "1"
+        assert s1.track['corrected'] == "1"
+
+    def testScrobbleAcceptedCorrectedArtistAndTrack(self):
+        scrobble0 = Scrobble(artist="Björk", track="Joga", timestamp=str(int(time.time())))
+        scrobble1 = Scrobble(artist="Bjork", track="Jóga", timestamp=str(int(time.time())))
+        scrobble2 = Scrobble(artist="Bjork", track="Joga", timestamp=str(int(time.time())))
+        
+        resp = self.client.scrobbleBatch([scrobble0,scrobble1,scrobble2])
+        print resp.prettify()
+        assert int(resp.scrobbles['accepted']) == 3
+        assert int(resp.scrobbles['ignored']) == 0
+        s0,s1,s2 = resp.findAll("scrobble")
+        assert s0.track.contents[0] == u"Jóga"
+        assert s0.track['corrected'] == "1"
+        assert s1.artist.contents[0] == u"Björk"
+        assert s1.artist['corrected'] == "1"
+        assert s2.track.contents[0] == u"Jóga"
+        assert s2.track['corrected'] == "1"
+        assert s2.artist.contents[0] == u"Björk"
+        assert s2.artist['corrected'] == "1"
 
 def suite():
     suite = unittest.TestSuite([ unittest.TestLoader().loadTestsFromTestCase(ScrobbleBatchTestCase)])
